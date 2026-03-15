@@ -1,0 +1,24 @@
+{
+  "name": "@prescription-companion/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/server.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@fastify/multipart": "^9.4.0",
+    "@prescription-companion/ai": "0.1.0",
+    "@prescription-companion/observability": "0.1.0",
+    "@prescription-companion/security": "0.1.0",
+    "@prescription-companion/supabase": "0.1.0",
+    "dotenv": "^16.4.7",
+    "fastify": "^5.2.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

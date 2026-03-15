@@ -1,0 +1,22 @@
+{
+  "name": "prescription-companion",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Prescription Companion healthcare AI workflow prototype",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @prescription-companion/web & npm run dev --workspace @prescription-companion/api",
+    "dev:web": "npm run dev --workspace @prescription-companion/web",
+    "dev:api": "npm run dev --workspace @prescription-companion/api",
+    "dev:scheduler": "npm run dev --workspace @prescription-companion/scheduler",
+    "seed:demo": "node scripts/seed-demo.mjs",
+    "build": "npm run build --workspaces",
+    "typecheck": "npm run typecheck --workspaces"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM"],
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@prescription-companion/supabase": ["packages/supabase/src/index.ts"],
+      "@prescription-companion/security": ["packages/security/src/index.ts"],
+      "@prescription-companion/observability": ["packages/observability/src/index.ts"],
+      "@prescription-companion/ai": ["packages/ai/src/index.ts"],
+      "@prescription-companion/scheduler": ["packages/scheduler/src/index.ts"]
+    }
+  }
+}

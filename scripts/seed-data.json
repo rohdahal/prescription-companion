@@ -1,0 +1,158 @@
+{
+  "guidanceDocuments": [
+    {
+      "id": "guidance-amoxicillin-food",
+      "title": "Amoxicillin food guidance",
+      "content": "Amoxicillin can be taken with food if it helps reduce stomach upset. Complete the full course exactly as prescribed.",
+      "embedding": [0.31, 0.28, 0.11, 0.44, 0.37, 0.22, 0.18, 0.29]
+    },
+    {
+      "id": "guidance-missed-dose",
+      "title": "Missed dose basics",
+      "content": "If a dose is missed, take it when remembered unless it is close to the next dose. Do not double doses unless a clinician explicitly instructed that plan.",
+      "embedding": [0.42, 0.14, 0.26, 0.33, 0.19, 0.24, 0.31, 0.17]
+    },
+    {
+      "id": "guidance-metformin-gi",
+      "title": "Metformin stomach upset guidance",
+      "content": "Metformin is commonly taken with meals to reduce gastrointestinal side effects such as nausea or diarrhea.",
+      "embedding": [0.27, 0.35, 0.22, 0.39, 0.18, 0.3, 0.21, 0.25]
+    },
+    {
+      "id": "guidance-refill-followup",
+      "title": "Refill and follow-up reminder guidance",
+      "content": "Patients on chronic medication should review refill dates, monitor adherence trends, and keep follow-up visits on schedule.",
+      "embedding": [0.23, 0.19, 0.4, 0.28, 0.34, 0.27, 0.22, 0.31]
+    }
+  ],
+  "careVisits": [
+    {
+      "visitType": "Primary care follow-up",
+      "providerName": "Dr. Maya Patel",
+      "location": "North Loop Family Clinic",
+      "offsetHours": -336,
+      "summary": "Reviewed blood pressure trend and medication adherence. Continued lisinopril and reinforced morning dosing.",
+      "nextSteps": ["Track home blood pressure three times per week", "Bring readings to the next visit"]
+    },
+    {
+      "visitType": "Urgent care visit",
+      "providerName": "Dr. Aaron Chen",
+      "location": "Riverfront Urgent Care",
+      "offsetHours": -168,
+      "summary": "Evaluated sore throat and started amoxicillin course with food to reduce stomach upset.",
+      "nextSteps": ["Finish antibiotic course", "Follow up if symptoms persist after day 7"]
+    },
+    {
+      "visitType": "Diabetes medication review",
+      "providerName": "Nurse Practitioner Elena Ruiz",
+      "location": "Midtown Endocrine Center",
+      "offsetHours": -72,
+      "summary": "Reviewed metformin tolerance and evening meal routine. No dose change today.",
+      "nextSteps": ["Keep evening meal log", "Review A1c next month"]
+    }
+  ],
+  "prescriptions": [
+    {
+      "rawText": "Amoxicillin 500 mg capsule twice daily for 7 days. Take with food and water.",
+      "medicationName": "Amoxicillin",
+      "dosage": "500 mg capsule",
+      "frequency": "Twice daily",
+      "instructions": "Take one capsule every 12 hours with food and water for 7 days.",
+      "followUpRecommendation": "Follow up if symptoms persist after the final dose.",
+      "schedule": {
+        "frequency": "Twice daily",
+        "doseTimes": ["08:00", "20:00"]
+      },
+      "adherenceLogs": [
+        { "offsetHours": -96, "taken": true },
+        { "offsetHours": -84, "taken": true },
+        { "offsetHours": -72, "taken": true },
+        { "offsetHours": -60, "taken": false },
+        { "offsetHours": -48, "taken": true },
+        { "offsetHours": -36, "taken": true },
+        { "offsetHours": -24, "taken": false },
+        { "offsetHours": -12, "taken": true },
+        { "offsetHours": 0, "taken": true }
+      ],
+      "reminders": [
+        { "type": "dose", "offsetHours": 2, "status": "pending", "meta": { "source": "seed-json" } },
+        { "type": "follow_up", "offsetHours": 72, "status": "pending", "meta": { "source": "seed-json" } },
+        { "type": "refill", "offsetHours": 144, "status": "pending", "meta": { "source": "seed-json" } }
+      ],
+      "chatHistory": [
+        { "role": "user", "message": "Can I take this with food?", "offsetHours": -20 },
+        {
+          "role": "assistant",
+          "message": "Yes. For this seeded prescription, the instruction is to take it with food and water.",
+          "offsetHours": -19.99
+        },
+        { "role": "user", "message": "What if I miss a dose?", "offsetHours": -8 },
+        {
+          "role": "assistant",
+          "message": "Take it when you remember unless it is almost time for the next scheduled dose. Do not double up.",
+          "offsetHours": -7.99
+        }
+      ]
+    },
+    {
+      "rawText": "Metformin 500 mg tablet once daily with dinner.",
+      "medicationName": "Metformin",
+      "dosage": "500 mg tablet",
+      "frequency": "Once daily",
+      "instructions": "Take one tablet with your evening meal.",
+      "followUpRecommendation": "Review blood sugar log with your clinician in 4 weeks.",
+      "schedule": {
+        "frequency": "Once daily",
+        "doseTimes": ["18:30"]
+      },
+      "adherenceLogs": [
+        { "offsetHours": -120, "taken": true },
+        { "offsetHours": -96, "taken": true },
+        { "offsetHours": -72, "taken": true },
+        { "offsetHours": -48, "taken": true },
+        { "offsetHours": -24, "taken": true }
+      ],
+      "reminders": [
+        { "type": "dose", "offsetHours": 6, "status": "pending", "meta": { "source": "seed-json" } },
+        { "type": "follow_up", "offsetHours": 168, "status": "pending", "meta": { "source": "seed-json" } }
+      ],
+      "chatHistory": [
+        { "role": "user", "message": "Should I take metformin on an empty stomach?", "offsetHours": -30 },
+        {
+          "role": "assistant",
+          "message": "This seeded prescription says to take it with your evening meal, which is commonly done to reduce stomach upset.",
+          "offsetHours": -29.99
+        }
+      ]
+    },
+    {
+      "rawText": "Lisinopril 10 mg tablet once daily every morning.",
+      "medicationName": "Lisinopril",
+      "dosage": "10 mg tablet",
+      "frequency": "Once daily",
+      "instructions": "Take one tablet every morning at the same time each day.",
+      "followUpRecommendation": "Monitor blood pressure at home and review readings next month.",
+      "schedule": {
+        "frequency": "Once daily",
+        "doseTimes": ["09:00"]
+      },
+      "adherenceLogs": [
+        { "offsetHours": -96, "taken": true },
+        { "offsetHours": -72, "taken": false },
+        { "offsetHours": -48, "taken": true },
+        { "offsetHours": -24, "taken": true }
+      ],
+      "reminders": [
+        { "type": "dose", "offsetHours": 12, "status": "pending", "meta": { "source": "seed-json" } }
+      ],
+      "chatHistory": [
+        { "role": "user", "message": "When should I take this blood pressure medication?", "offsetHours": -14 },
+        {
+          "role": "assistant",
+          "message": "The seeded instructions say to take it every morning at the same time each day.",
+          "offsetHours": -13.99
+        }
+      ]
+    }
+  ]
+}

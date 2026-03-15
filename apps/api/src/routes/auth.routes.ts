@@ -1,11 +1,9 @@
 import type { FastifyInstance } from "fastify";
-import { getCurrentSupabaseUser } from "../lib/currentUser";
-import { loadSeedSession, saveSeedSession } from "../lib/devSessionStore";
 
 export async function authRoutes(app: FastifyInstance) {
   app.get("/auth/me", async (request, reply) => {
     try {
-      const user = await getCurrentSupabaseUser(request.headers.authorization);
+      const user = await app.services.getCurrentSupabaseUser(request.headers.authorization);
 
       return {
         id: user.id,
@@ -26,8 +24,8 @@ export async function authRoutes(app: FastifyInstance) {
         return { error: "missing_access_token" };
       }
 
-      const user = await getCurrentSupabaseUser(`Bearer ${accessToken}`);
-      await saveSeedSession({
+      const user = await app.services.getCurrentSupabaseUser(`Bearer ${accessToken}`);
+      await app.services.saveSeedSession({
         accessToken,
         userId: user.id,
         email: user.email ?? null,
@@ -47,7 +45,7 @@ export async function authRoutes(app: FastifyInstance) {
   });
 
   app.get("/auth/dev-session", async (_request, reply) => {
-    const session = await loadSeedSession();
+    const session = await app.services.loadSeedSession();
     if (!session) {
       reply.code(404);
       return { error: "dev_session_not_found" };

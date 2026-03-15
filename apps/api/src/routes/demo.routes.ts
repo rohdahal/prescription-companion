@@ -1,12 +1,10 @@
 import type { FastifyInstance } from "fastify";
-import { seedDemoDataForUser } from "../lib/demoSeed";
-import { getCurrentSupabaseUser } from "../lib/currentUser";
 
 export async function demoRoutes(app: FastifyInstance) {
   app.post("/demo/seed", async (request, reply) => {
     try {
-      const user = await getCurrentSupabaseUser(request.headers.authorization);
-      const result = await seedDemoDataForUser({
+      const user = await app.services.getCurrentSupabaseUser(request.headers.authorization);
+      const result = await app.services.seedDemoDataForUser({
         userId: user.id,
         email: user.email ?? null
       });

@@ -1,9 +1,7 @@
 import path from "node:path";
 import dotenv from "dotenv";
-import fastify from "fastify";
-import multipart from "@fastify/multipart";
 import { getOAuthApiKey } from "@prescription-companion/ai";
-import { apiPlugin } from "./plugins/api";
+import { buildApp } from "./app";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 dotenv.config({ path: path.resolve(process.cwd(), "../../.env.local"), override: false });
@@ -22,10 +20,7 @@ async function ensureCodexAuthOnStartup() {
   }
 }
 
-const app = fastify({ logger: true });
-
-app.register(multipart);
-app.register(apiPlugin);
+const app = buildApp();
 
 const port = Number(process.env.BACKEND_PORT ?? 3001);
 

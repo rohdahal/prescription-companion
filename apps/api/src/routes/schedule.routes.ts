@@ -1,6 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { createSupabaseAdminClient } from "@prescription-companion/supabase";
-import { getCurrentSupabaseUser } from "../lib/currentUser";
+import type { AppServices } from "../lib/services";
 
 type ScheduleBody = {
   prescriptionId: string;
@@ -17,8 +16,8 @@ function buildSchedule(frequency: string) {
 export async function scheduleRoutes(app: FastifyInstance) {
   app.get("/schedule", async (request, reply) => {
     try {
-      const user = await getCurrentSupabaseUser(request.headers.authorization);
-      const supabase = createSupabaseAdminClient();
+      const user = await app.services.getCurrentSupabaseUser(request.headers.authorization);
+      const supabase = app.services.createSupabaseAdminClient();
 
       const { data: prescriptions, error: prescriptionError } = await supabase
         .from("prescriptions")
@@ -77,8 +76,8 @@ export async function scheduleRoutes(app: FastifyInstance) {
 
   app.get("/dashboard", async (request, reply) => {
     try {
-      const user = await getCurrentSupabaseUser(request.headers.authorization);
-      const supabase = createSupabaseAdminClient();
+      const user = await app.services.getCurrentSupabaseUser(request.headers.authorization);
+      const supabase = app.services.createSupabaseAdminClient();
 
       const { data: prescriptions, error: prescriptionError } = await supabase
         .from("prescriptions")
@@ -139,7 +138,7 @@ export async function scheduleRoutes(app: FastifyInstance) {
   });
 
   app.post<{ Body: ScheduleBody }>("/schedules/generate", async (request, reply) => {
-    const supabase = createSupabaseAdminClient();
+    const supabase = app.services.createSupabaseAdminClient();
     const times = buildSchedule(request.body.frequency);
     const { data, error } = await supabase
       .from("medication_schedules")
@@ -162,7 +161,7 @@ export async function scheduleRoutes(app: FastifyInstance) {
   app.post<{ Body: { prescriptionId: string; doseTime: string; taken: boolean } }>(
     "/schedules/adherence",
     async (request, reply) => {
-      const supabase = createSupabaseAdminClient();
+      const supabase = app.services.createSupabaseAdminClient();
       const { error } = await supabase.from("adherence_logs").insert({
         prescription_id: request.body.prescriptionId,
         dose_time: request.body.doseTime,
@@ -181,7 +180,7 @@ export async function scheduleRoutes(app: FastifyInstance) {
   app.get<{ Params: { prescriptionId: string } }>(
     "/schedules/adherence/:prescriptionId",
     async (request, reply) => {
-      const supabase = createSupabaseAdminClient();
+      const supabase = app.services.createSupabaseAdminClient();
       const result = await getAdherenceSummary(supabase, request.params.prescriptionId);
 
       if ("error" in result) {
@@ -194,7 +193,7 @@ export async function scheduleRoutes(app: FastifyInstance) {
 }
 
 async function getAdherenceSummary(
-  supabase: ReturnType<typeof createSupabaseAdminClient>,
+  supabase: ReturnType<AppServices["createSupabaseAdminClient"]>,
   prescriptionId: string
 ) {
   const { data, error } = await supabase

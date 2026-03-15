@@ -1,11 +1,5 @@
 import { randomUUID } from "node:crypto";
 import type { FastifyInstance } from "fastify";
-import { extractPrescription } from "@prescription-companion/ai";
-import { logAuditEvent, maskPhi } from "@prescription-companion/security";
-import { createSupabaseAdminClient } from "@prescription-companion/supabase";
-import { uploadPrescriptionFile } from "../lib/storage";
-import { getCurrentSupabaseUser } from "../lib/currentUser";
-import { extractTextFromUpload } from "../lib/textExtraction";
 
 type IngestBody = {
   patientId: string;
@@ -18,8 +12,8 @@ type IngestBody = {
 export async function prescriptionsRoutes(app: FastifyInstance) {
   app.get("/prescriptions", async (request, reply) => {
     try {
-      const user = await getCurrentSupabaseUser(request.headers.authorization);
-      const supabase = createSupabaseAdminClient();
+      const user = await app.services.getCurrentSupabaseUser(request.headers.authorization);
+      const supabase = app.services.createSupabaseAdminClient();
       const { data, error } = await supabase
         .from("prescriptions")
         .select("id, medication_name, dosage, frequency, instructions, created_at")
@@ -41,8 +35,8 @@ export async function prescriptionsRoutes(app: FastifyInstance) {
 
   app.get("/prescriptions/latest", async (request, reply) => {
     try {
-      const user = await getCurrentSupabaseUser(request.headers.authorization);
-      const supabase = createSupabaseAdminClient();
+      const user = await app.services.getCurrentSupabaseUser(request.headers.authorization);
+      const supabase = app.services.createSupabaseAdminClient();
       const { data, error } = await supabase
         .from("prescriptions")
         .select("*")
@@ -61,7 +55,7 @@ export async function prescriptionsRoutes(app: FastifyInstance) {
         return { error: "not_found" };
       }
 
-      await logAuditEvent({
+      await app.services.logAuditEvent({
         actorId: user.id,
         actorType: "patient",
         action: "view_prescription",
@@ -80,28 +74,28 @@ export async function prescriptionsRoutes(app: FastifyInstance) {
   app.post<{ Body: IngestBody }>("/prescriptions/ingest", async (request, reply) => {
     try {
       const body = request.body;
-      const supabase = createSupabaseAdminClient();
+      const supabase = app.services.createSupabaseAdminClient();
       const fileBuffer = body.fileBase64 ? Buffer.from(body.fileBase64, "base64") : undefined;
-      const text = await extractTextFromUpload({
+      const text = await app.services.extractTextFromUpload({
         providedText: body.text,
         fileBuffer
       });
 
       let storageRef: { bucket: string; key: string } | null = null;
       if (fileBuffer && body.fileName) {
-        storageRef = await uploadPrescriptionFile({
+        storageRef = await app.services.uploadPrescriptionFile({
           key: `prescriptions/${randomUUID()}-${body.fileName}`,
           body: fileBuffer,
           contentType: "application/octet-stream"
         });
       }
 
-      const extracted = await extractPrescription(text);
+      const extracted = await app.services.extractPrescription(text);
       const { data, error } = await supabase
         .from("prescriptions")
         .insert({
           patient_id: body.patientId,
-          raw_text: maskPhi(text),
+          raw_text: app.services.maskPhi(text),
           medication_name: extracted.medicationName,
           dosage: extracted.dosage,
           frequency: extracted.frequency,
@@ -118,7 +112,7 @@ export async function prescriptionsRoutes(app: FastifyInstance) {
         return { error: "supabase_error" };
       }
 
-      await logAuditEvent({
+      await app.services.logAuditEvent({
         actorId: body.actorId ?? body.patientId,
         actorType: "patient",
         action: "upload_prescription",
@@ -138,7 +132,7 @@ export async function prescriptionsRoutes(app: FastifyInstance) {
   app.get<{ Params: { id: string }; Querystring: { actorId?: string } }>(
     "/prescriptions/:id",
     async (request, reply) => {
-      const supabase = createSupabaseAdminClient();
+      const supabase = app.services.createSupabaseAdminClient();
       const { data, error } = await supabase
         .from("prescriptions")
         .select("*")
@@ -155,7 +149,7 @@ export async function prescriptionsRoutes(app: FastifyInstance) {
         return { error: "not_found" };
       }
 
-      await logAuditEvent({
+      await app.services.logAuditEvent({
         actorId: request.query.actorId ?? "anonymous",
         actorType: "patient",
         action: "view_prescription",

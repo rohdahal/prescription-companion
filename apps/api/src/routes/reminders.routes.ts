@@ -1,5 +1,4 @@
 import type { FastifyInstance } from "fastify";
-import { createSupabaseAdminClient } from "@prescription-companion/supabase";
 
 type ReminderBody = {
   prescriptionId: string;
@@ -9,7 +8,7 @@ type ReminderBody = {
 
 export async function remindersRoutes(app: FastifyInstance) {
   app.post<{ Body: ReminderBody }>("/reminders/events", async (request, reply) => {
-    const supabase = createSupabaseAdminClient();
+    const supabase = app.services.createSupabaseAdminClient();
     const { data, error } = await supabase
       .from("reminder_events")
       .insert({
@@ -29,4 +28,3 @@ export async function remindersRoutes(app: FastifyInstance) {
     return data;
   });
 }
-

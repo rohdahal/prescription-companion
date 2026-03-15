@@ -1,6 +1,4 @@
 import type { FastifyInstance } from "fastify";
-import { createSupabaseAdminClient } from "@prescription-companion/supabase";
-import { getCurrentSupabaseUser } from "../lib/currentUser";
 
 type LinkedPrescription = {
   id: string;
@@ -15,8 +13,8 @@ type LinkedPrescription = {
 export async function careRoutes(app: FastifyInstance) {
   app.get("/care", async (request, reply) => {
     try {
-      const user = await getCurrentSupabaseUser(request.headers.authorization);
-      const supabase = createSupabaseAdminClient();
+      const user = await app.services.getCurrentSupabaseUser(request.headers.authorization);
+      const supabase = app.services.createSupabaseAdminClient();
 
       const { data: visits, error: visitsError } = await supabase
         .from("care_visits")

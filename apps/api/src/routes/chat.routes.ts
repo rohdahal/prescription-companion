@@ -1,8 +1,4 @@
 import type { FastifyInstance } from "fastify";
-import { askMedicationAssistant } from "@prescription-companion/ai";
-import { logAuditEvent } from "@prescription-companion/security";
-import { createSupabaseAdminClient } from "@prescription-companion/supabase";
-import { getCurrentSupabaseUser } from "../lib/currentUser";
 
 type ChatBody = {
   question: string;
@@ -14,8 +10,8 @@ type ChatBody = {
 export async function chatRoutes(app: FastifyInstance) {
   app.get<{ Querystring: { prescriptionId: string } }>("/chat/history", async (request, reply) => {
     try {
-      const user = await getCurrentSupabaseUser(request.headers.authorization);
-      const supabase = createSupabaseAdminClient();
+      const user = await app.services.getCurrentSupabaseUser(request.headers.authorization);
+      const supabase = app.services.createSupabaseAdminClient();
       const { data, error } = await supabase
         .from("chat_threads")
         .select("id, title, subtitle, created_at, updated_at, messages:chat_history_messages(id, role, message, created_at)")
@@ -41,9 +37,9 @@ export async function chatRoutes(app: FastifyInstance) {
 
   app.post<{ Body: ChatBody }>("/chat", async (request, reply) => {
     try {
-      const user = await getCurrentSupabaseUser(request.headers.authorization);
-      const supabase = createSupabaseAdminClient();
-      const result = await askMedicationAssistant({
+      const user = await app.services.getCurrentSupabaseUser(request.headers.authorization);
+      const supabase = app.services.createSupabaseAdminClient();
+      const result = await app.services.askMedicationAssistant({
         question: request.body.question,
         prescriptionId: request.body.prescriptionId
       });
@@ -117,7 +113,7 @@ export async function chatRoutes(app: FastifyInstance) {
         console.error("Failed to persist chat history", chatHistoryError);
       }
 
-      await logAuditEvent({
+      await app.services.logAuditEvent({
         actorId: request.body.actorId ?? user.id,
         actorType: "patient",
         action: "ai_query",

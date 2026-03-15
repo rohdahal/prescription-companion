@@ -32,7 +32,8 @@
       "location": "North Loop Family Clinic",
       "offsetHours": -336,
       "summary": "Reviewed blood pressure trend and medication adherence. Continued lisinopril and reinforced morning dosing.",
-      "nextSteps": ["Track home blood pressure three times per week", "Bring readings to the next visit"]
+      "nextSteps": ["Track home blood pressure three times per week", "Bring readings to the next visit"],
+      "prescriptionMedicationNames": ["Lisinopril"]
     },
     {
       "visitType": "Urgent care visit",
@@ -40,7 +41,8 @@
       "location": "Riverfront Urgent Care",
       "offsetHours": -168,
       "summary": "Evaluated sore throat and started amoxicillin course with food to reduce stomach upset.",
-      "nextSteps": ["Finish antibiotic course", "Follow up if symptoms persist after day 7"]
+      "nextSteps": ["Finish antibiotic course", "Follow up if symptoms persist after day 7"],
+      "prescriptionMedicationNames": ["Amoxicillin"]
     },
     {
       "visitType": "Diabetes medication review",
@@ -48,7 +50,8 @@
       "location": "Midtown Endocrine Center",
       "offsetHours": -72,
       "summary": "Reviewed metformin tolerance and evening meal routine. No dose change today.",
-      "nextSteps": ["Keep evening meal log", "Review A1c next month"]
+      "nextSteps": ["Keep evening meal log", "Review A1c next month"],
+      "prescriptionMedicationNames": ["Metformin"]
     }
   ],
   "prescriptions": [

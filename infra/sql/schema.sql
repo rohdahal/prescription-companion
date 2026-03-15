@@ -72,6 +72,12 @@ create table if not exists care_visits (
   created_at timestamptz not null default now()
 );
 
+create table if not exists care_visit_prescriptions (
+  visit_id uuid not null references care_visits(id),
+  prescription_id uuid not null references prescriptions(id),
+  primary key (visit_id, prescription_id)
+);
+
 create table if not exists audit_logs (
   id uuid primary key default gen_random_uuid(),
   actor_id text not null,

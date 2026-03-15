@@ -13,23 +13,22 @@ type CareVisit = {
   visit_date: string;
   summary: string;
   next_steps: string[];
-};
-
-type CarePrescription = {
-  id: string;
-  medication_name: string;
-  dosage: string;
-  frequency: string;
-  instructions: string;
-  follow_up_recommendation: string;
-  created_at: string;
+  prescriptions: Array<{
+    id: string;
+    medication_name: string;
+    dosage: string;
+    frequency: string;
+    instructions: string;
+    follow_up_recommendation: string;
+    created_at: string;
+  }>;
 };
 
 export default function CarePage() {
   const supabase = getSupabaseBrowserClientSafely();
   const [session, setSession] = useState<Session | null>(null);
   const [visits, setVisits] = useState<CareVisit[]>([]);
-  const [prescriptions, setPrescriptions] = useState<CarePrescription[]>([]);
+  const [selectedVisitId, setSelectedVisitId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -55,7 +54,7 @@ export default function CarePage() {
   useEffect(() => {
     if (!session?.access_token) {
       setVisits([]);
-      setPrescriptions([]);
+      setSelectedVisitId(null);
       setError(null);
       return;
     }
@@ -63,7 +62,7 @@ export default function CarePage() {
     void fetchCare(session.access_token)
       .then((data) => {
         setVisits(data.visits);
-        setPrescriptions(data.prescriptions);
+        setSelectedVisitId(data.visits[0]?.id ?? null);
         setError(null);
       })
       .catch(() => {
@@ -78,6 +77,8 @@ export default function CarePage() {
   if (error) {
     return <p className="empty-state">{error}</p>;
   }
+
+  const selectedVisit = visits.find((visit) => visit.id === selectedVisitId) ?? visits[0] ?? null;
 
   return (
     <section className="care-grid">
@@ -100,26 +101,31 @@ export default function CarePage() {
           </div>
 
           {visits.length > 0 ? (
-            visits.map((visit) => (
-              <article key={visit.id} className="care-card">
-                <div className="detail-header">
-                  <div>
-                    <p className="eyebrow">{new Date(visit.visit_date).toLocaleDateString()}</p>
-                    <h3>{visit.visit_type}</h3>
+            <div className="care-visit-list">
+              {visits.map((visit) => (
+                <button
+                  key={visit.id}
+                  className={visit.id === selectedVisit?.id ? "care-card care-card-button active" : "care-card care-card-button"}
+                  onClick={() => setSelectedVisitId(visit.id)}
+                  type="button"
+                >
+                  <div className="detail-header">
+                    <div>
+                      <p className="eyebrow">{new Date(visit.visit_date).toLocaleDateString()}</p>
+                      <h3>{visit.visit_type}</h3>
+                    </div>
+                    <span className="badge">{visit.provider_name}</span>
                   </div>
-                  <span className="badge">{visit.provider_name}</span>
-                </div>
-                <p className="section-copy">{visit.location}</p>
-                <p className="section-copy">{visit.summary}</p>
-                <div className="care-tags">
-                  {visit.next_steps.map((step) => (
-                    <span key={step} className="care-tag">
-                      {step}
+                  <p className="section-copy">{visit.location}</p>
+                  <div className="care-card-meta">
+                    <span>
+                      {visit.prescriptions.length} prescription{visit.prescriptions.length === 1 ? "" : "s"}
                     </span>
-                  ))}
-                </div>
-              </article>
-            ))
+                    <span>{visit.next_steps.length} next step{visit.next_steps.length === 1 ? "" : "s"}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
           ) : (
             <p className="empty-state">No care visits found yet. Re-run the seed after updating your schema.</p>
           )}
@@ -131,29 +137,60 @@ export default function CarePage() {
           <div className="detail-header">
             <div>
               <p className="eyebrow">Prescription details</p>
-              <h2>{prescriptions.length > 0 ? `${prescriptions.length} active records` : "No prescriptions yet"}</h2>
+              <h2>
+                {selectedVisit
+                  ? `${selectedVisit.prescriptions.length} linked to this visit`
+                  : "Select a visit"}
+              </h2>
             </div>
           </div>
 
-          {prescriptions.length > 0 ? (
-            prescriptions.map((prescription) => (
-              <article key={prescription.id} className="care-card">
+          {selectedVisit ? (
+            <>
+              <article className="care-card care-summary-card">
                 <div className="detail-header">
                   <div>
-                    <p className="eyebrow">{new Date(prescription.created_at).toLocaleDateString()}</p>
-                    <h3>{prescription.medication_name}</h3>
+                    <p className="eyebrow">Selected visit</p>
+                    <h3>{selectedVisit.visit_type}</h3>
                   </div>
-                  <span className="badge">{prescription.frequency}</span>
+                  <span className="badge">{selectedVisit.provider_name}</span>
                 </div>
+                <p className="section-copy">{selectedVisit.location}</p>
+                <p className="section-copy">{selectedVisit.summary}</p>
                 <div className="care-tags">
-                  <span className="care-tag">{prescription.dosage}</span>
+                  {selectedVisit.next_steps.map((step) => (
+                    <span key={step} className="care-tag">
+                      {step}
+                    </span>
+                  ))}
                 </div>
-                <p className="section-copy">{prescription.instructions}</p>
-                <p className="section-copy">{prescription.follow_up_recommendation}</p>
               </article>
-            ))
+
+              {selectedVisit.prescriptions.length > 0 ? (
+                <div className="care-prescription-list">
+                  {selectedVisit.prescriptions.map((prescription) => (
+                    <article key={prescription.id} className="care-card">
+                      <div className="detail-header">
+                        <div>
+                          <p className="eyebrow">{new Date(prescription.created_at).toLocaleDateString()}</p>
+                          <h3>{prescription.medication_name}</h3>
+                        </div>
+                        <span className="badge">{prescription.frequency}</span>
+                      </div>
+                      <div className="care-tags">
+                        <span className="care-tag">{prescription.dosage}</span>
+                      </div>
+                      <p className="section-copy">{prescription.instructions}</p>
+                      <p className="section-copy">{prescription.follow_up_recommendation}</p>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <p className="empty-state">No prescriptions are linked to this visit yet.</p>
+              )}
+            </>
           ) : (
-            <p className="empty-state">No prescriptions found yet. Seed data or upload a prescription first.</p>
+            <p className="empty-state">No care visits found yet. Seed data or create a visit first.</p>
           )}
         </article>
       </section>

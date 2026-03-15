@@ -143,15 +143,15 @@ export async function fetchCare(accessToken: string) {
       visit_date: string;
       summary: string;
       next_steps: string[];
-    }>;
-    prescriptions: Array<{
-      id: string;
-      medication_name: string;
-      dosage: string;
-      frequency: string;
-      instructions: string;
-      follow_up_recommendation: string;
-      created_at: string;
+      prescriptions: Array<{
+        id: string;
+        medication_name: string;
+        dosage: string;
+        frequency: string;
+        instructions: string;
+        follow_up_recommendation: string;
+        created_at: string;
+      }>;
     }>;
   }>;
 }

@@ -16,6 +16,7 @@ type SeedFixture = {
     offsetHours: number;
     summary: string;
     nextSteps: string[];
+    prescriptionMedicationNames: string[];
   }>;
   prescriptions: Array<{
     rawText: string;
@@ -66,29 +67,13 @@ export async function seedDemoDataForUser(params: { userId: string; email?: stri
   }
 
   const insertedPrescriptionIds: string[] = [];
+  const prescriptionIdsByMedicationName = new Map<string, string>();
   let careVisitCount = 0;
+  let careVisitPrescriptionCount = 0;
   let scheduleCount = 0;
   let adherenceCount = 0;
   let reminderCount = 0;
   let chatHistoryCount = 0;
-
-  const careVisitEntries = fixture.careVisits.map((visit) => ({
-    patient_id: params.userId,
-    visit_type: visit.visitType,
-    provider_name: visit.providerName,
-    location: visit.location,
-    visit_date: new Date(now + visit.offsetHours * 60 * 60 * 1000).toISOString(),
-    summary: visit.summary,
-    next_steps: visit.nextSteps
-  }));
-
-  if (careVisitEntries.length > 0) {
-    const { error: careVisitError } = await supabase.from("care_visits").insert(careVisitEntries);
-    if (careVisitError) {
-      throw new Error(`demo_seed_care_visits_failed:${careVisitError.message}`);
-    }
-    careVisitCount = careVisitEntries.length;
-  }
 
   for (const item of fixture.prescriptions) {
     const { data: prescription, error: prescriptionError } = await supabase
@@ -112,6 +97,7 @@ export async function seedDemoDataForUser(params: { userId: string; email?: stri
     }
 
     insertedPrescriptionIds.push(prescription.id);
+    prescriptionIdsByMedicationName.set(item.medicationName, prescription.id);
 
     const { data: schedule, error: scheduleError } = await supabase
       .from("medication_schedules")
@@ -230,6 +216,48 @@ export async function seedDemoDataForUser(params: { userId: string; email?: stri
     }
   }
 
+  for (const visit of fixture.careVisits) {
+    const { data: insertedVisit, error: careVisitError } = await supabase
+      .from("care_visits")
+      .insert({
+        patient_id: params.userId,
+        visit_type: visit.visitType,
+        provider_name: visit.providerName,
+        location: visit.location,
+        visit_date: new Date(now + visit.offsetHours * 60 * 60 * 1000).toISOString(),
+        summary: visit.summary,
+        next_steps: visit.nextSteps
+      })
+      .select("id")
+      .single();
+
+    if (careVisitError || !insertedVisit) {
+      throw new Error(`demo_seed_care_visits_failed:${careVisitError?.message ?? "unknown"}`);
+    }
+
+    careVisitCount += 1;
+
+    const careVisitPrescriptionEntries = visit.prescriptionMedicationNames
+      .map((medicationName) => prescriptionIdsByMedicationName.get(medicationName))
+      .filter((prescriptionId): prescriptionId is string => Boolean(prescriptionId))
+      .map((prescriptionId) => ({
+        visit_id: insertedVisit.id,
+        prescription_id: prescriptionId
+      }));
+
+    if (careVisitPrescriptionEntries.length > 0) {
+      const { error: careVisitPrescriptionError } = await supabase
+        .from("care_visit_prescriptions")
+        .insert(careVisitPrescriptionEntries);
+
+      if (careVisitPrescriptionError) {
+        throw new Error(`demo_seed_care_visit_prescriptions_failed:${careVisitPrescriptionError.message}`);
+      }
+
+      careVisitPrescriptionCount += careVisitPrescriptionEntries.length;
+    }
+  }
+
   return {
     userId: params.userId,
     email: params.email ?? null,
@@ -238,6 +266,7 @@ export async function seedDemoDataForUser(params: { userId: string; email?: stri
     counts: {
       prescriptions: insertedPrescriptionIds.length,
       careVisits: careVisitCount,
+      careVisitPrescriptions: careVisitPrescriptionCount,
       schedules: scheduleCount,
       adherenceLogs: adherenceCount,
       reminderEvents: reminderCount,

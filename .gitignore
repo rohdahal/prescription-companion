@@ -9,3 +9,4 @@ coverage/
 *.tsbuildinfo
 .DS_Store
 oauth.json
+apps/api/.seed-session.json
